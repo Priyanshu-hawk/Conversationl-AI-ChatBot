@@ -1,29 +1,30 @@
 from dotenv import load_dotenv
 import os
+
+# basic chatbot
 from groq import Groq
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain.chains.conversation.memory import ConversationBufferWindowMemory
-from langchain_core.messages import SystemMessage
+# langchain chatbot
+from langchain_core.messages import HumanMessage, RemoveMessage, SystemMessage, AIMessage
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import START, MessagesState, StateGraph
 from langchain_groq import ChatGroq
+from dotenv import load_dotenv
 
+from uuid import uuid4
 
 # config
 from config import bot_config
-
 load_dotenv()
-GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-system_prompt = {
-    "role": "system",
-    "content": "You are a helpful assistant You name is Priyanshu's Bot. You reply with short and concise answers. If you don't know the answer to a question, you can say 'unknown'"
-}
-
 
 # Basic chatbot
 class Chatbot:
     def __init__(self):
-        self.llm = Groq(api_key=GROQ_API_KEY)
-        self.conversation_history = [system_prompt]
+        self.llm = Groq() # api key is in env 
+        self.conversation_history = [{
+            "role": "system",
+            "content": bot_config["bot"]["prompt"]["system"]
+        }]
     def get_response(self, user_input):
         try:
             self.conversation_history.append({"role": "user", "content": user_input})
@@ -47,36 +48,47 @@ class Chatbot:
         except Exception as e:
             return "I'm sorry, I encountered an error. Could you please try again?"
         
-class chatbotLangchain:
+class ChatBotLangchain:
     def __init__(self):
-        self.llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name='llama-3.3-70b-versatile')
-        self.memory = ConversationBufferWindowMemory(k=bot_config["conversation"]["max_history"], memory_key="chat_history", return_messages=True)
+        self.llm = ChatGroq(model=bot_config["model"]["name"]) # api key is in env
+        
+        self.workflow = StateGraph(state_schema=MessagesState)
+        self.workflow.add_node("model", self._call_model)
+        self.workflow.add_edge(START, "model")
+        
+        self.memory = MemorySaver()
+        self.app = self.workflow.compile(checkpointer=self.memory)
+        
+        self.system_prompt = (bot_config["bot"]["prompt"]["system"])
 
-    def get_response(self, user_input):
-        if user_input == "":
-            return "Please enter a valid input."
+    def _call_model(self, state: MessagesState):
+        system_message = SystemMessage(content=self.system_prompt)
+        message_history = state["messages"][:-1]
+        
+        if len(message_history) >= 120:
+            last_human_message = state["messages"][-1]
+            summary_prompt = "Distill the above chat messages into a single summary message. Include as many specific details as you can."
+            summary_message = self.llm.invoke(message_history + [HumanMessage(content=summary_prompt)])
+            delete_messages = [RemoveMessage(id=m.id) for m in state["messages"]]
+            human_message = HumanMessage(content=last_human_message.content)
+            response = self.llm.invoke([system_message, summary_message, human_message])
+            message_updates = [summary_message, human_message, response] + delete_messages
+        else:
+            message_updates = self.llm.invoke([system_message] + state["messages"])
+        
+        return {"messages": message_updates}
+
+    def get_response(self, user_input: str) -> str:
         try:
-            prompt = ChatPromptTemplate.from_messages(
-                [
-                    SystemMessage(
-                        content=bot_config["bot"]["prompt"]["system"]
-                    ),
-                    MessagesPlaceholder(
-                        variable_name="chat_history"
-                    ),
-                    HumanMessagePromptTemplate.from_template(
-                        "{human_input}"
-                    ),
-                ]
-            )
-
-            conversation = prompt | self.llm
-
-            response = conversation(
-                chat_history=self.memory,
-                human_input=user_input
-            )
-            return response
+            state = {"messages": [HumanMessage(content=user_input)]}
+            response = self.app.invoke(state, config={"configurable": {"thread_id": str(uuid4())}})
+            
+            bot_response = response["messages"][-1].content
+            if not bot_response or bot_response.lower() == "unknown":
+                return "I'm sorry, I don't have an answer to that question."
+            
+            return bot_response
+            
         except Exception as e:
-            print(e)
-            return bot_config["bot"]["system_error"]
+            print(f"Error: {str(e)}")
+            return "I'm sorry, I encountered an error. Could you please try again?"

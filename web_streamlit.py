@@ -1,5 +1,8 @@
 import streamlit as st
-from chatbot import Chatbot, chatbotLangchain
+from streamlit_geolocation import streamlit_geolocation
+
+from chatbot import Chatbot, ChatBotLangchain
+
 
 # Page config
 st.set_page_config(page_title="Priyanshu's AI Chatbot", page_icon="🤖")
@@ -7,7 +10,7 @@ st.title("AI Chatbot")
 
 # Initialize chatbot
 # chatbot = Chatbot()
-chatbot = chatbotLangchain()
+chatbot = ChatBotLangchain()
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
@@ -24,6 +27,11 @@ if prompt := st.chat_input("What's on your mind?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
+
+    # # check implem.
+    # if prompt == "location":
+    #     location = streamlit_geolocation()
+    #     st.write(location)
     
     # Get bot response
     response = chatbot.get_response(prompt)
