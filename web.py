@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from chatbot import ChatBotLangchain
 import os
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 # chatbot = Chatbot()
@@ -50,4 +51,19 @@ def greet():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = 7331     # NICE
+    try:
+        if os.getenv("ENVIORNMENT") == "dev":
+            app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
+
+        if os.getenv("ENVIORNMENT") == "prod":
+            http_server = WSGIServer(('', port), app)
+            http_server.serve_forever()
+    except KeyboardInterrupt as e:
+        print(e)
+    except Exception as e:
+        print("Error", e)
+    finally:
+        print("oops! finally block")
+        print("Server Stopped")
+        pass

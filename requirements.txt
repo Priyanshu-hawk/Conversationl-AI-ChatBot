@@ -1,6 +1,11 @@
-python-dotenv
-groq
+#server
 flask
+gevent
+
+#local env
+python-dotenv
+
+groq
 langchain
 langchain-groq
 langchain-community
