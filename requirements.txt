@@ -1,6 +1,7 @@
 python-dotenv
 groq
 flask
-streamlit
 langchain
 langchain-groq
+langchain-community
+langgraph
