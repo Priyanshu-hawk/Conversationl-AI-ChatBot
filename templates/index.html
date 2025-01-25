@@ -35,8 +35,10 @@
                        required 
                        pattern="[A-Za-z0-9_]+" 
                        title="Only letters, numbers and underscore allowed">
+                <button id="submit-user-id" onclick="greetUser()">Submit</button>
             </div>
         </div>
+        
         <div id="chat-messages"></div>
         <div class="typing-indicator">
             <span></span>
@@ -79,15 +81,14 @@
 
             if (!isUser) {
                 try {
-                    const markdownContent = document.createElement('div');
-                    markdownContent.className = 'markdown-content';
-                    markdownContent.innerHTML = marked.parse(content);
-                    messageBubble.appendChild(markdownContent);
+                    // Parse markdown content
+                    const parsedContent = marked.parse(content);
+                    messageBubble.innerHTML = parsedContent;
+                    // Highlight code blocks
                     messageBubble.querySelectorAll('pre code').forEach((block) => {
                         Prism.highlightElement(block);
                     });
                 } catch (error) {
-                    console.error('Markdown parsing error:', error);
                     messageBubble.textContent = content;
                 }
             } else {
@@ -99,38 +100,81 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
+        async function greetUser() {
+            const userId = document.getElementById('user-id-input').value.trim();
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+
+            const submitButton = document.getElementById('submit-user-id');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
+            try {
+                const response = await fetch('/greet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                console.log(data);
+                // Add greeting message to chat
+                addMessage(data.response, false);
+                
+                // Update UI state
+                document.getElementById('user-id-input').disabled = true;
+                document.getElementById('message-input').disabled = false;
+                isUserIdSubmitted = true;
+                submitButton.textContent = 'Submitted ✓';
+            } catch (error) {
+                console.error('Error:', error);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+                addMessage('Error connecting to server. Please try again.', false);
+            }
+        }
+
         async function sendMessage() {
-        const input = document.getElementById('message-input');
-        const userId = document.getElementById('user-id-input').value.trim();
-        const message = input.value.trim();
-        
-        if (!userId) {
-            alert('Please enter a User ID');
-            return;
-        }
-        if (!message) return;
+            if (!isUserIdSubmitted) {
+                alert('Please submit your User ID first');
+                return;
+            }
+            
+            const input = document.getElementById('message-input');
+            const userId = document.getElementById('user-id-input').value.trim();
+            const message = input.value.trim();
+            
+            if (!message) return;
 
-        addMessage(message, true);
-        input.value = '';
-        showTypingIndicator();
+            addMessage(message, true);
+            input.value = '';
+            showTypingIndicator();
 
-        try {
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    message: message,
-                    user_id: userId
-                })
-            });
-            const data = await response.json();
-            hideTypingIndicator();
-            addMessage(data.response);
-        } catch (error) {
-            hideTypingIndicator();
-            addMessage('Sorry, there was an error processing your message.');
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: userId
+                    })
+                });
+                const data = await response.json();
+                hideTypingIndicator();
+                addMessage(data.response);
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('Sorry, there was an error processing your message.');
+            }
         }
-    }
 
         document.getElementById('message-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -145,6 +189,10 @@
             } else {
                 container.classList.remove('valid');
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('message-input').disabled = true;
         });
     </script>
 </body>

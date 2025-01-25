@@ -208,3 +208,40 @@ button:hover {
         transform: translateY(0);
     }
 }
+
+#submit-user-id {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 8px 15px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#submit-user-id:hover {
+    background: #0056b3;
+}
+
+#submit-user-id:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+#message-input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+#message-input:disabled::placeholder {
+    color: #999;
+}
+
+.input-container button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
