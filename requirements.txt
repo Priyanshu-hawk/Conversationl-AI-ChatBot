@@ -1,6 +1,6 @@
 #server
 flask
-gevent
+gunicorn
 
 #local env
 python-dotenv
