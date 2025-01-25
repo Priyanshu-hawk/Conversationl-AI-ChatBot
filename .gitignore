@@ -1,3 +1,4 @@
 .env
 venv
 __pycache__
+personal_info.json
