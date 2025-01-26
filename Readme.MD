@@ -138,9 +138,10 @@ Conversationl-AI-ChatBot
 
 ## Deployment ⚠️⚠️⚠️
 ### The reason i put this in the deployment section at the end is because this project is not properly working on the deployment server. 
-This project is deployed on Koyeb. But Few things are not working as expected. Because of the limitations of the free tier of Koyeb. This which are not working are:
+This project is deployed on Koyeb. But Few things are not working as expected. Because of the limitations of the free tier of Koyeb. This things are not working are:
 - Persistent storage of user information (Some times it works, sometimes it doesn't)
 - Time queries (It give the time of the server where the code is running)
+- Slow API call for weather API.
 
 #### Deployment Link: [ChatBot](https://disciplinary-odelia-priyanshu-hawk-a555e99d.koyeb.app/)
 

@@ -1,6 +1,6 @@
 # Conversation Examples
 
-### Usins: user_id = test1
+### Using: user_id = test1
 
 ### Blank conversation
 1. Blank chat (No user ID)
