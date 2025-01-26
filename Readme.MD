@@ -37,12 +37,16 @@ cd <repository-name>
 ```
 
 2. Create and activate a virtual environment:
+- For Linux/Mac:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+- For Windows (May this works, I don't have windows machine to test):
 ```bash
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+venv\Scripts\activate
 ```
-
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
@@ -73,7 +77,7 @@ ENVIRONMENT=dev
 ```bash
 python web.py
 ```
-The application will be available at `http://localhost:5000`
+The application will be available at [http://localhost:5000](http://localhost:5000)
 
 ### Production Deployment
 ```bash
