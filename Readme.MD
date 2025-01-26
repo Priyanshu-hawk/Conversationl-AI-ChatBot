@@ -111,8 +111,7 @@ gunicorn --bind :$PORT --workers=1 web:app
   - "Can you tell me more about that?"
   - "Remind me of my name"
 
-### Example Conversations with the chatbot.
-[conversation examples](conversation_examples.md)
+### ⭐ Example Conversations with the chatbot: [Conversation examples here](conversation_examples.md)
 
 ## Project Structure
 Commmand to generate tree on linux - `tree Conversationl-AI-ChatBot-Vizares -L 2`
@@ -143,7 +142,7 @@ This project is deployed on Koyeb. But Few things are not working as expected. B
 - Persistent storage of user information (Some times it works, sometimes it doesn't)
 - Time queries (It give the time of the server where the code is running)
 
-#### Deployment Link: [ChatBot](https://tired-edna-priyanshu-hawk-a94df497.koyeb.app/)
+#### Deployment Link: [ChatBot](https://disciplinary-odelia-priyanshu-hawk-a555e99d.koyeb.app/)
 
 ## Configuration
 
