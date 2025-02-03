@@ -102,8 +102,11 @@ body {
     border-radius: 25px;
     outline: none;
     font-size: 14px;
+    resize: none;
+    min-height: 40px;
+    max-height: 120px;
+    font-family: inherit;
 }
-
 button {
     padding: 12px 24px;
     background: #007bff;
@@ -244,4 +247,23 @@ button:hover {
 .input-container button:disabled {
     background: #cccccc;
     cursor: not-allowed;
+}
+
+.input-container button {
+    position: relative;
+}
+
+.input-container button:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-bottom: 5px;
 }
